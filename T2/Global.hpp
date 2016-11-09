@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "Graphics.h"
+#include <time.h>
 
 #define LN 12
 #define COL 12
@@ -11,6 +12,7 @@
 #define MOVSPD 64
 #define CasaVazia '.'
 
+extern int ModuloErrado;
 extern int SW;
 extern int SH;
 extern int posInicialX;
@@ -23,10 +25,19 @@ extern char UltimaCasaAcessada;
 extern char CasaAtual;
 extern int NLoop;
 extern int GAME_STATE;
-char mapa_global[LN][COL];
+extern int PRE_LOAD_STATE;
+extern int MESSAGE_STATE;
 
 void le_mapa();
 void passa_mapa(char mapa[LN][COL]);
+void deleta_ponto(int x, int y);
+void passa_backup(char mapa[LN][COL]);
+
+int in_range(int time, int min, int max);
+int get_range(int duration, int nframes);
+int in_range_delayed(int time, int prop, int acclrt);
+
+void adjust_scale(float scale, int tile_size, int* x, int *y, int *size);
 
 /*
 #define SW = 1400;

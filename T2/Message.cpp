@@ -1,9 +1,5 @@
 #include <string.h>
 #include "Message.hpp"
-#include "Graphics.h"
-
-static Graphics mensagem;
-static TextCls text;
 
 static Image MBox;
 
@@ -18,17 +14,14 @@ TextCls::TextCls()
 	_uob = 'u';
 	_concluido = 0;
 	_waiting = 0;
-	_loader = 0;
+	_warn = 0;
+	_start = 0;
+	_delay = 0;
 }
 void TextCls::load_message(void)
 {
-	if(_loader == 0)
-	{
-		_loader = 1;
-		MBox.LoadPNGImage("Sprites\\MessageBox\\BigMB.png");
-	}
+	MBox.LoadPNGImage("Sprites\\MessageBox\\BigMB.png");
 }
-
 int TextCls::get_status(void)
 {
 	return _status;
@@ -37,27 +30,18 @@ void TextCls::set_status(int n)
 {
 	_status = n;
 }
-void TextCls::writeText(void)
+void TextCls::writeText(Graphics& mensagem, int timer)
 {
-	if(_status == 0)	
+	if(_elemento != 'E')
 	{
-		NLoop = 0;
-		_status = 1;
-		_concluido = 0;
-		_waiting = 0;
+		mensagem.DrawImage2D(MyZeroX+DFLTSIZE-20, MyZeroX, 650, 150, MBox);
+		mensagem.SetTextFont("Pokemon R/S",30, false, false, false);
+		mensagem.SetColor(100,100,100);
+		write1char(_elemento, mensagem);
 	}
-	load_message();
-	_elemento = CasaAtual;
-	mensagem.DrawImage2D(MyZeroX+DFLTSIZE-20, MyZeroX, 650, 150, MBox);
-	mensagem.SetTextFont("Pokemon R/S",30, false, false, false);
-	mensagem.SetColor(100,100,100);
-	if(_waiting == 0) 
+	else
 	{
-		write1char(_elemento);
-	}
-	else if(_waiting == 1)
-	{
-		writestring(_elemento,_uob);
+		_status = 0;
 	}
 }
 char* TextCls::char2string(char elemento)
@@ -99,7 +83,7 @@ char* TextCls::char2string(char elemento)
 	}
 	else
 	{
-		printf("Elemento Invalido\n");
+		printf("Modulo: Message\nFuncao char2string:\tElemento Invalido\n");
 		exit(1);
 	}
 	tamanho = (strlen(prestr) + strlen(s) + strlen(posstr)) + (1 - 3);
@@ -107,90 +91,14 @@ char* TextCls::char2string(char elemento)
 	strcpy(result, prestr);
 	strcat(result, s);
 	strcat(result, posstr);
+	_delay = (2 * strlen(result)) + 50;
 	return result;
 /*	char *s;
 	s = (char*)malloc(200*sizeof(char));
 	strcpy(s,"A wild buraco has appeared!!");
 	return s;*/
 }
-void TextCls::write1char(char elemento)
-{
-	int i;
-	int spaceX = (_distX - _sizeNC);
-	int spaceY;
-	char *s;
-	int size;
-	int sizechar = _sizeNC;;
-	if(_uob == 'u')
-	{
-		spaceY = _distY;
-		s = char2string(elemento);
-		size = (int)strlen(s);
-	}
-	else if(_uob == 'b')
-	{
-		spaceY = _distY - 35;
-		s = getBotString(elemento);
-		size = (int)strlen(s);
-	}
-	_concluido++;
-	if(_concluido == size)
-	{
-		_concluido = 0;
-		_waiting = 1;
-	}
-	else
-	{
-		if(_uob == 'u')
-		{
-			for(i=0; i< NLoop+1; i++)
-			{
-				if(i > 0)
-				{
-					if((s[i-1] == 'i') || (s[i-1] == 'l'))
-					{
-						sizechar = _sizeSC;
-					}
-					else if(s[i-1] == 'r')
-					{
-						sizechar = 10;
-					}
-					else
-					{
-						sizechar = _sizeNC;
-					}
-				}
-				spaceX += sizechar;
-				mensagem.DrawText2D(spaceX, spaceY, "%c", s[i]);
-			}
-		}
-		else if(_uob == 'b')
-		{
-			writestring(elemento, 'u');
-			for(i=0; i< NLoop+1; i++)
-			{
-				if(i > 0)
-				{
-					if((s[i-1] == 'i') || (s[i-1] == 'l'))
-					{
-						sizechar = _sizeSC;
-					}
-					else if(s[i-1] == 'r')
-					{
-						sizechar = 10;
-					}
-					else
-					{
-						sizechar = _sizeNC;
-					}
-				}
-				spaceX += sizechar;
-				mensagem.DrawText2D(spaceX, spaceY, "%c", s[i]);
-			}
-		}
-	}
-}
-void TextCls::writestring(char elemento, char uob)
+void TextCls::write1char(char elemento,Graphics& mensagem)
 {
 	int i;
 	int spaceX = (_distX - _sizeNC);
@@ -198,19 +106,187 @@ void TextCls::writestring(char elemento, char uob)
 	char *s;
 	int size;
 	int sizechar = _sizeNC;
-	if(uob == 'u')
+	if(_uob == 'u')
 	{
 		spaceY = _distY;
 		s = char2string(elemento);
 	}
-	else if(uob == 'b')
+	else
 	{
 		spaceY = _distY - 35;
 		s = getBotString(elemento);
-		writestring(elemento, 'u');
 	}
-	size = (int)strlen(s);
+	if(_concluido < (int)strlen(s))
+	{
+		_concluido++;
+	}
+	else
+	{
+		_concluido = 0;
+		if(_uob == 'u')
+		{
+			_uob = 'b';
+		}
+		else
+		{
+			_uob = ' ';
+		}
+		return;
+	}
+	size = _concluido;
+	if(_uob == 'u')
+	{
+		for(i=0; i< size; i++)
+		{
+			if(i > 0)
+			{
+				if((s[i-1] == 'i') || (s[i-1] == 'l'))
+				{
+					sizechar = _sizeSC;
+				}
+				else if(s[i-1] == 'r')
+				{
+					sizechar = 10;
+				}
+				else
+				{
+					sizechar = _sizeNC;
+				}
+			}
+			spaceX += sizechar;
+			mensagem.DrawText2D(spaceX, spaceY, "%c", s[i]);
+		}
+	}
+	else if(_uob == 'b')
+	{
+		writestring(elemento, 'u', mensagem);
+		for(i=0; i<  size; i++)
+		{
+			if(i > 0)
+			{
+				if((s[i-1] == 'i') || (s[i-1] == 'l'))
+				{
+					sizechar = _sizeSC;
+				}
+				else if(s[i-1] == 'r')
+				{
+					sizechar = 10;
+				}
+				else
+				{
+					sizechar = _sizeNC;
+				}
+			}
+			spaceX += sizechar;
+			mensagem.DrawText2D(spaceX, spaceY, "%c", s[i]);
+		}
+	}
+}
+void TextCls::writestring(char elemento, char uob,Graphics& mensagem)
+{
+	int i;
+	int spaceX = (_distX - _sizeNC);
+	int spaceY;
+	char *str;
+	int size;
+	int sizechar = _sizeNC;
+	if(uob == 'u')
+	{
+		spaceY = _distY;
+		str = char2string(elemento);
+	}
+	else if(uob == 'b')
+	{
+		spaceY = _distY - 35;
+		str = getBotString(elemento);
+		writestring(elemento, 'u',mensagem);
+	}
+	size = (int)strlen(str);
 	for(i=0; i < size; i++)
+	{
+		if(i > 0)
+		{
+			if((str[i-1] == 'i') || (str[i-1] == 'l'))
+			{
+				sizechar = _sizeSC;
+			}
+			else if(str[i-1] == 'r')
+			{
+				sizechar = 10;
+			}
+			else
+			{
+				sizechar = _sizeNC;
+			}
+		}
+		spaceX += sizechar;
+		mensagem.DrawText2D(spaceX, spaceY, "%c", str[i]);
+	}
+}
+char* TextCls::getBotString(char elemento)
+{
+	char *string;
+	if(elemento == 'P')
+	{
+		string = (char*)malloc(sizeof("You died!!"));
+		strcpy(string,"You died!!");
+	}
+	else if(elemento == 'U' || elemento == 'O')
+	{
+		string = (char*)malloc(sizeof("Press G to grab it."));
+		strcpy(string,"Press G to grab it.");
+	}
+	else if(elemento == 'D' || elemento == 'd')
+	{
+		string = (char*)malloc(sizeof("Press W to bathe in the blood of your enemy"));
+		strcpy(string,"Press W to bathe in the blood of your enemy");
+	}
+	else if(elemento == 'T')
+	{
+		string = (char*)malloc(sizeof("Start praying!!"));
+		strcpy(string,"Start praying!!");
+	}
+	return string;
+}
+void TextCls::exibePrivate(void)
+{
+	printf("Text:\n");
+	printf("Status: %d\n", _status);
+	printf("UOB: %c\n", _uob);
+	printf("Waiting: %d\n", _waiting);
+	printf("Concluido: %d\n", _concluido);
+	printf("Elemento: %c\n", _elemento);
+}
+void TextCls::show_warning(char elemento, Graphics& mensagem,  AgenteCls &agnt)
+{
+	int i;
+	int spaceX = (_distX - _sizeNC);
+	int spaceY = _distY;
+	int sizechar = _sizeNC;
+	int size;
+	char s[200];
+	if(elemento == 'O')
+	{
+		strcpy(s,"Ouro obtained!!");
+	}
+	else if( elemento == 'U')
+	{
+		strcpy(s,"Player!! This isnt the time to do that!!");
+	}
+	else if(agnt._health <= 0)
+	{
+		strcpy(s,"Oh... Im afraid you died!! Press R to restart");
+	}
+	size = strlen(s);
+	if(_concluido < size)
+	{
+		_concluido++;
+	}
+	else
+	{
+		_warn = 0;
+	}
+	for(i=0; i < _concluido; i++)
 	{
 		if(i > 0)
 		{
@@ -231,37 +307,93 @@ void TextCls::writestring(char elemento, char uob)
 		mensagem.DrawText2D(spaceX, spaceY, "%c", s[i]);
 	}
 }
-char* TextCls::getBotString(char elemento)
+void TextCls::set_gowarn(int n)
 {
-	char *s;
-	if(elemento == 'P')
-	{
-		s = (char*)malloc(sizeof("You died!!"));
-		strcpy(s,"You died!!");
-	}
-	else if(elemento == 'U' || elemento == 'O')
-	{
-		s = (char*)malloc(sizeof("Press G to grab it."));
-		strcpy(s,"Press G to grab it.");
-	}
-	else if(elemento == 'D' || elemento == 'd')
-	{
-		s = (char*)malloc(sizeof("Press W to bathe in the blood of your enemy"));
-		strcpy(s,"Press W to bathe in the blood of your enemy");
-	}
-	else if(elemento == 'T')
-	{
-		s = (char*)malloc(sizeof("Start praying!!"));
-		strcpy(s,"Start praying!!");
-	}
-	return s;
+	_gowarn = n;
 }
-void TextCls::exibePrivate(void)
+void TextCls::readytext(char elemento, Graphics &mensagem)
 {
-	printf("Text:\n");
-	printf("Status: %d\n", _status);
-	printf("UOB: %c\n", _uob);
-	printf("Waiting: %d\n", _waiting);
-	printf("Concluido: %d\n", _concluido);
-	printf("Elemento: %c\n", _elemento);
+	int i;
+	int space = (_distX - _sizeNC);
+	char *upper;
+	char *bottom;
+	upper = char2string(elemento);
+	bottom = getBotString(elemento);
+	mensagem.DrawImage2D(MyZeroX+DFLTSIZE-20, MyZeroX, 650, 150, MBox);
+	mensagem.SetTextFont("Pokemon R/S",30, false, false, false);
+	mensagem.SetColor(100,100,100);
+	//mensagem.DrawText2D(_distX, _distY, "%s", upper);
+	//mensagem.DrawText2D(_distX, _distY - 35, "%s", bottom);
+	for(i=0; i< (int)strlen(upper); i++)
+	{
+		if(i > 0)
+		{
+			if((upper[i-1] == 'i') || (upper[i-1] == 'l'))
+			{
+				space += _sizeSC;
+			}
+			else if(upper[i-1] == 'r')
+			{
+				space += 10;
+			}
+			else
+			{
+				space += _sizeNC;
+			}
+		}
+		else
+		{
+			space += _sizeNC;
+		}
+		mensagem.DrawText2D(space, _distY, "%c", upper[i]);
+	}
+	space = (_distX - _sizeNC);
+	for(i=0; i< (int)strlen(bottom); i++)
+	{
+		if(i > 0)
+		{
+			if((bottom[i-1] == 'i') || (bottom[i-1] == 'l'))
+			{
+				space += _sizeSC;
+			}
+			else if(bottom[i-1] == 'r')
+			{
+				space += 10;
+			}
+			else
+			{
+				space += _sizeNC;
+			}
+		}
+		else
+		{
+			space += _sizeNC;
+		}
+		mensagem.DrawText2D(space, _distY - 35, "%c", bottom[i]);
+	}
+	_waiting = 1;
+	_concluido = 0;
 }
+void TextCls::set_sucess(int n)
+{
+	_sucess = n;
+}
+/*
+void TextCls::staticText(Graphics &mensagem, char elemento, float timer)
+{
+	int i;
+	int duration;
+	char *upper;
+	char *bottom;
+	duration = 3;
+	upper = char2string(elemento);
+	bottom = getBotString(elemento);
+	mensagem.DrawImage2D(MyZeroX+DFLTSIZE-20, MyZeroX, 650, 150, MBox);
+	mensagem.SetTextFont("Pokemon R/S",30, false, false, false);
+	mensagem.SetColor(100,100,100);
+	if(timer%(duration*1000) <= duration)
+	{
+		mensagem.DrawText2D(_distX, _distY, "%s", upper);
+		mensagem.DrawText2D(_distX, _distY - 35, "%s", bottom);
+	}
+}*/

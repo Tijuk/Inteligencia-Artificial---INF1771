@@ -1,8 +1,6 @@
 #pragma once
 #include <stdio.h>
-
-#define _LN 12
-#define _COL 12
+#include "Global.hpp"
 
 class InterGraf 
 {
@@ -16,17 +14,12 @@ private:
 public:
 	InterGraf();
 	void iniciaGraficos(int FlSn);
-	void insereHealthHUD(void);
 	void executa(void);
 	void iniciaMapa(void);
 	void exibeMapa(void);
-	void teclado_jogo(int *key, int *state, int *x, int *y);
-	void teclado_message(int *key, int *state, int *x, int *y);
-};
-
-class ElementosCls{
-public:
-	void atualizaOuro(void);
+	void novoKBoard2(int *_key);
+	void auxilia(void);
+	void log_erro(void);
 };
 
 class EndGameCls
@@ -39,4 +32,32 @@ private:
 public:
 	void finalizaJogo(void);
 	void reset(void);
+};
+
+class TalkProlog
+{
+private:
+	int _pace;
+	int _health;
+	int _gold;
+	int _bullets;
+	int _x;
+	int _y;
+public:
+	TalkProlog();
+	int get_direction(int x, int y);
+	void le_prolog(void);
+	void talk_prolog(int *h, int *b, int *x, int *y);
+	void attagnt(void);
+};
+
+class ClsHUD
+{
+private:
+	int scale;
+public:
+	ClsHUD();
+	void insereHUD(void);
+	void insereHealthHUD(void);
+	void insereDownHUD(void);
 };
