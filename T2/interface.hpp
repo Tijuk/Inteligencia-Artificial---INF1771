@@ -30,7 +30,7 @@ private:
 	void victory(void);
 	void defeat(void);
 public:
-	void finalizaJogo(void);
+	void checaJogo(void);
 	void reset(void);
 };
 
@@ -48,7 +48,6 @@ public:
 	int get_direction(int x, int y);
 	void le_prolog(void);
 	void talk_prolog(int *h, int *b, int *x, int *y);
-	void attagnt(void);
 };
 
 class ClsHUD
@@ -59,5 +58,18 @@ public:
 	ClsHUD();
 	void insereHUD(void);
 	void insereHealthHUD(void);
+	void insereCoinHUD(void);
 	void insereDownHUD(void);
+};
+
+class EndGame{
+private:
+	int loop;
+	int w;
+	int h;
+public:
+	EndGame();
+	void EndHUD(int _time);
+	void writeScore(int elem);
+	void YouDied(void);
 };

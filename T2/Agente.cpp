@@ -12,8 +12,8 @@ void AgenteCls::drawstatic(Graphics& agent_pkm, Animation& anim)
 AgenteCls::AgenteCls()
 {
 	_scale = 0.75f;
-	_posX = (COL-1)*DFLTSIZE + MyZeroX;
-	_posY = (LN-1)* DFLTSIZE + MyZeroY;
+	_posX = (posInicialX+1) * DFLTSIZE + MyZeroX;
+	_posY = (posInicialY+1) * DFLTSIZE + MyZeroY;
 	_spritesize = DFLTSIZE;
 	adjust_scale(_scale,DFLTSIZE, &_posX, &_posY, &_spritesize);
 	_state = -1;
@@ -208,7 +208,7 @@ void AgenteCls::atualiza_agente(int indexX, int indexY)
 	UltimaCasaAcessada = a_map[indexX][indexY];
 	if(UltimaCasaAcessada == 'P')
 	{
-		//_health = 0;
+		_health = 0;
 	}
 	else if(UltimaCasaAcessada == 'D')
 	{
@@ -216,7 +216,6 @@ void AgenteCls::atualiza_agente(int indexX, int indexY)
 	}
 	else if(UltimaCasaAcessada == 'O')
 	{
-		printf("Entrou\n");
 		_gold++;
 		deleta_ponto(indexX,indexY);
 		//a_map[indexX][indexY] = CasaVazia;

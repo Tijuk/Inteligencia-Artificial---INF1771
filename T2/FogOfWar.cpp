@@ -11,8 +11,8 @@ FOW_cls::FOW_cls()
 			_fow[i][j] = 0;
 		}
 	}
-	x = posInicialX;
-	y = LN-posInicialY-1;
+	y = posInicialX;
+	x = LN-posInicialY-1;
 	_fow[x][y] = 2;
 }
 void FOW_cls::load(void)
@@ -96,7 +96,7 @@ void FOW_cls::getCurrentTile(AgenteCls& agnt, int *i, int *j)
 	cmpX = agnt.pos2index(agnt._posX,0);
 	cmpY = agnt.pos2index(agnt._posY,1);
 	*j = cmpX;
-	*i = (LN-cmpY-1);
+	*i = LN-cmpY-1;
 	//printf("%d - %d\n", cmpX, cmpY);
 	if(cmpX < 0 || cmpY < 0)
 	{

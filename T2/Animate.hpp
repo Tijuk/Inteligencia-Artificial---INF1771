@@ -6,7 +6,7 @@ class Animation{
 private:
 	Image Vortex[17];
 	Image Spark[11];
-	Image BEnemy[2];
+	Image BEnemy[21];
 	Image SEnemy[2];
 	Image Telep[4];
 	Image Coin[6];
@@ -16,6 +16,9 @@ private:
 	Image Agente_L[4];
 	Image Agente_R[4];
 	Image SmokeScreen[10];
+	Image EndGame;
+	Image Dead;
+	Image CoinHUD[4];
 	int n_frames;
 public:
 	void load_animations(char elemento);
@@ -26,4 +29,5 @@ public:
 	Image PassaElementos(char elemento, int time);
 	Image PassaOutros(char elemento, int time);
 	void curtaincalls(Graphics& graph, int _time, int scX, int scY , bool closure);
+	void Animation::AnimEndGame(Graphics& graph, int _time, int boo);
 };

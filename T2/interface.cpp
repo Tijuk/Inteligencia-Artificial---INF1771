@@ -10,6 +10,8 @@
 #include "Agente.hpp"
 #include "PreLoad.hpp"
 
+int AI = 1;
+
 static Graphics graphics;
 static InterGraf graf;
 static FOW_cls fogow;
@@ -21,14 +23,10 @@ static char mapa[LN][COL];
 static PLCls preload;
 static TalkProlog info;
 static ClsHUD HUD;
+static EndGame end;
 
 Image MapFloor,Grade;
 Image RightWall, LeftWall, TopWall, DownWall, TLCorner, TRCorner, DLCorner, DRCorner;
-Image Ouro;
-Image BigEnemy;
-Image SmallEnemy;
-Image PowerUp;
-Image Teleport;
 Image Buraco;
 Image MarcaBuraco;
 Image MarcaInimigo;
@@ -56,10 +54,6 @@ void MainLoop()
 		//preload.loop_pre_load(graphics,anim);
 		PRE_LOAD_STATE = 0;
 	}
-	else if(POS_LOAD_STATE == 1)
-	{
-		POS_LOAD_STATE = 0;
-	}
 	else
 	{
 		if(NLoop == 0)
@@ -74,6 +68,9 @@ void MainLoop()
 			time_float += getTime();
 			timer = getSecond(time_float);
 			graf.iniciaMapa();
+			CasaAtual = agnt.checa_casa_atual();
+			fogow.atualiza_fow(agnt);
+			//fogow.imprime_fow(graphics);
 			if(agnt.get_AGENT_STATE() == 0)
 			{
 				agnt.drawstatic(graphics,anim);
@@ -84,15 +81,18 @@ void MainLoop()
 				//Sleep(100);
 				Sleep(10);
 			}
-			CasaAtual = agnt.checa_casa_atual();
-			if(agnt.checkWin() == 1)
+			if(POS_LOAD_STATE == 0)
 			{
-				//POS_LOAD_STATE = 1;
-				//endgame.finalizaJogo();
+				endgame.checaJogo();
+				if(AI == 1)
+				{
+					info.le_prolog();
+				}
 			}
-			info.le_prolog();
-			fogow.atualiza_fow(agnt);
-			fogow.imprime_fow(graphics);
+			else
+			{
+				end.EndHUD(NLoop);
+			}
 			//graf.auxilia();
 			passa_mapa(mapa);
 			HUD.insereHUD();
@@ -143,11 +143,6 @@ void InterGraf::carregaImagens(void)
 	TRCorner.LoadPNGImage("Sprites\\Wall\\TRCorner.png");
 	DLCorner.LoadPNGImage("Sprites\\Wall\\DLCorner.png");
 	DRCorner.LoadPNGImage("Sprites\\Wall\\DRCorner.png");
-	Ouro.LoadPNGImage("Sprites\\Ouro\\Coin1.png");
-	BigEnemy.LoadPNGImage("Sprites\\Inimigos\\InimigoGrande.png");
-	SmallEnemy.LoadPNGImage("Sprites\\Inimigos\\InimigoPequeno.png");
-	PowerUp.LoadPNGImage("Sprites\\PowerUp\\PU12.png");
-	Teleport.LoadPNGImage("Sprites\\Teleport\\Teleport1.png");
 	Buraco.LoadPNGImage("Sprites\\Buraco\\Buraco.png");
 	Grade.LoadPNGImage("Sprites\\grid.png");
 	MarcaBuraco.LoadPNGImage("Sprites\\Marks\\HoleMark.png");
@@ -353,28 +348,26 @@ void teclado(int key, int state, int x, int y)
 {
 	if (state == KEY_STATE_UP)
 		return;
+	if(AI == 0)
+	{
+		if(agnt.get_AGENT_STATE() == 0)
+		{
+			if(POS_LOAD_STATE == 0)
+				graf.novoKBoard2(&key);
+		}
+	}
 	if(key == 'h') //help
 	{
 		printf("Agente:\n");
-		//printf("HP: %d\n", agnt._health);
+		printf("HP: %d\n", agnt._health);
 		printf("Gold: %d\n",agnt._gold);
 		printf("PosX: %d\n",agnt._posX);
 		printf("PosY: %d\n",agnt._posY);
-		//printf("Inimigos Derrotados: %d\n",0);
-		//printf("MapEdgeX: %d\n", mapEdgeX);
-		//printf("MapEdgeY: %d\n", mapEdgeY);
+		printf("MapEdgeX: %d\n", mapEdgeX);
+		printf("MapEdgeY: %d\n", mapEdgeY);
 		printf("index X: %d\n",agnt.pos2index(agnt._posX,0));
 		printf("index Y: %d\n",agnt.pos2index(agnt._posY,1));
 		printf("Elemento: %c\n", agnt.checa_casa_atual());
-		/*
-		printf("Text:\n");
-		printf("Status: %d\n",text.get_status());
-		printf("Waiting: %d\n", text._waiting);
-		printf("Warn: %d\n", text._warn);
-		printf("goWarn: %d\n",text._gowarn);
-		printf("Game_STATE: %d\n", GAME_STATE);
-		*/
-		
 		printf("Mapa:\n");
 		graf.exibeMapa();
 
@@ -394,28 +387,26 @@ void teclado(int key, int state, int x, int y)
 	{
 		endgame.reset();
 	}
+	else if(key == '1')
+	{
+		POS_LOAD_STATE = 1;
+	}
 
 }
-void EndGameCls::finalizaJogo(void)
+void EndGameCls::checaJogo(void)
 {
-	int agntposfinalX, agntposfinalY;
-	agntposfinalY = agnt.pos2index(agnt._posX,0);
-	agntposfinalX = agnt.pos2index(agnt._posY,1);
-	if(agnt._health > 0 && agnt._gold == 3 && agntposfinalX == posInicialX && agntposfinalY == posInicialY)//vitoria
+	if(agnt._health <= 0)
 	{
-		printf("PARABENS!! VOCE VENCEU\n");
-		exit(0);
+		POS_LOAD_STATE = 1;
+		NLoop = 0;
 	}
-	else if(agnt._health <= 0) //defeat
+	if(CasaAtual == 'E')
 	{
-		printf("PARABENS!! VOCE PERDEU\n");
-		endgame.reset();
-	}
-	else //erro
-	{
-		printf("Errmmm... Voce nao deveria estar aqui!! - EndGame::finalizaJogo\n");
-		graf.log_erro();
-		exit(1);
+		if(agnt._gold == 3)
+		{
+			POS_LOAD_STATE = 1;
+			NLoop = 0;
+		}
 	}
 }
 void EndGameCls::reset(void)
@@ -431,8 +422,8 @@ void EndGameCls::reset(void)
 			fogow._fow[i][j] = 0;
 		}
 	}
-	i = posInicialX;
-	j = LN-posInicialY-1;
+	j = posInicialX;
+	i = LN-posInicialY-1;
 	fogow._fow[i][j] = 2;
 //	fogow.exibe_fow();
 
@@ -440,8 +431,9 @@ void EndGameCls::reset(void)
 	agnt._gold = 0;
 	agnt._health = 100;
 	posfixer = ((1-agnt._scale)/2)*DFLTSIZE;
-	agnt._posX = (COL-1)* DFLTSIZE + MyZeroX + (int)posfixer;
-	agnt._posY = (LN-1)* DFLTSIZE + MyZeroY + (int)posfixer;
+	agnt._posX = DFLTSIZE + MyZeroX + (int)posfixer;
+	agnt._posY = DFLTSIZE + MyZeroY + (int)posfixer;
+	agnt._passos = 0;
 
 	//reseta mapa
 	for(i=0; i<LN; i++)
@@ -451,6 +443,7 @@ void EndGameCls::reset(void)
 			passa_backup(mapa);
 		}
 	}
+	POS_LOAD_STATE = 0;
 	GAME_STATE = 0;
 //	graf.exibeMapa();
 }
@@ -593,7 +586,6 @@ TalkProlog::TalkProlog()
 	_x = 1;
 	_y = 1;
 }
-
 int TalkProlog::get_direction(int x, int y)
 {
 	int value = 0;
@@ -637,9 +629,8 @@ void TalkProlog::le_prolog(void)
 	x = 0, y = 0;
 	if(agnt.get_AGENT_STATE() == 0)
 	{
-		talk_prolog(&_health, &_bullets, &x, &y);
-		direc = get_direction(x,y);
-		//UltimaCasaAcessada = mapa[x][LN-(y+1)];
+		//talk_prolog(&_health, &_bullets, &x, &y);
+		direc = (rand()%4)+1;//get_direction(x,y);
 		agnt.checa_casa_atual();
 		if(direc != 0)
 		{
@@ -655,21 +646,13 @@ void TalkProlog::le_prolog(void)
 			if(teleportado == 1)
 			{
 				agnt._posX = agnt.index2pos(x,0);
-				printf("x: %d\n", agnt._posX);
 				agnt._posY = agnt.index2pos(LN-(y+1),1);
-				printf("y: %d\n", agnt._posY);
 			}
-			attagnt();
+			agnt.checa_casa_atual();
+			Sleep(50);
 		}
 	}
 }
-
-void TalkProlog::attagnt(void)
-{
-	agnt._health = _health;
-	agnt._bullets = _bullets;
-}
-
 void TalkProlog::talk_prolog(int* h, int* b, int* x, int* y)
 {
 	int health, bullets, cx,cy;
@@ -721,7 +704,6 @@ void TalkProlog::talk_prolog(int* h, int* b, int* x, int* y)
 }
 
 
-
 void ClsHUD::insereHealthHUD(void)
 {
 	int HUDWidth;
@@ -734,11 +716,18 @@ void ClsHUD::insereHealthHUD(void)
 	coordY = mapEdgeY - HUDHeight;
 	graphics.DrawImage2D(coordX,coordY,HUDWidth,HUDHeight,HealthHUD[agnt._health/10]);
 }
-
+void ClsHUD::insereCoinHUD(void)
+{
+	int x;
+	int y;
+	x = mapEdgeX + (140*scale);
+	y = mapEdgeY - (100*scale);
+	graphics.DrawImage2D(x,y,150,65, anim.PassaOutros('O', agnt._gold));
+}
 void ClsHUD::insereDownHUD(void)
 {
-	int y = mapEdgeY - (120*scale);
-	int x = mapEdgeX + (45*scale);
+	int y = mapEdgeY - (170*scale);
+	int x = mapEdgeX + (25*scale);
 	int w = 225 * scale;
 	int h = 75 * scale;
 	int dx = 80;
@@ -753,10 +742,89 @@ void ClsHUD::insereDownHUD(void)
 void ClsHUD::insereHUD(void)
 {
 	insereHealthHUD();
+	insereCoinHUD();
 	insereDownHUD();
 }
 
 ClsHUD::ClsHUD()
 {
 	scale = DFLTSIZE/32;
+}
+
+EndGame::EndGame()
+{
+	w = 420;
+	h = 280;
+}
+void EndGame::EndHUD(int _time)
+{
+	if(agnt._health <= 0)
+	{
+		anim.AnimEndGame(graphics, _time-1,1);
+		if(_time > 700)
+		{
+			//endgame.reset();
+		}
+	}
+	else
+	{
+		anim.AnimEndGame(graphics, _time-100,0);
+		int delay = 50;
+		if(_time > 500)
+		{
+			writeScore(0);
+			if(_time > 500 + delay)
+			{
+				writeScore(1);
+				if(_time > 500+ 2*delay)
+				{
+						writeScore(2);
+						if(_time > 500 + 3*delay)
+						{
+							writeScore(3);
+						}
+				}
+			}
+		}
+	}
+}
+
+void EndGame::writeScore(int elem)
+{
+	int i;
+	int val;
+	char valor[10];
+	int x = (7*DFLTSIZE + MyZeroX) - 20;
+	int y = 542;
+	int dx, dy;
+	dy = 33 + 11;
+	dx = 0;
+	if(elem == 0)
+	{
+		val = agnt._gold;
+	}
+	else if(elem == 1)
+	{
+		val = agnt._health;
+		dx = -3;
+
+	}
+	else if(elem == 2)
+	{
+		val = agnt._bullets;
+		dx = 14;
+	}
+	else if(elem == 3)
+	{
+		val = agnt._passos;
+		dx = 41;
+		dy--;
+	}
+	sprintf(valor,"%d",val);
+	for(i=0; valor[i]!='\0';i++);
+	dx += (i-1)*15;
+	if(i>1) dx -= (15*(i-1));
+	graphics.SetColor(30,30,30);
+	graphics.SetTextFont("Pokemon R/S",48, false, false, false);
+	graphics.DrawText2D(x+dx,y - (elem*dy),"%s", valor);
 }

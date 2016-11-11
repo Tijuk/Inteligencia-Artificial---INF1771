@@ -6,9 +6,10 @@
 
 void Animation::load_animations(char elemento)
 {
-	char extensao[5] = ".png";
-	char number[10];
-	char paths[50][300];
+	char extensao[30] = ".png";
+	char ext2[30] = "_delay-0.02s.png";
+	char number[30];
+	char paths[200][300];
 	int i;
 	if(elemento == 'U')
 	{
@@ -31,8 +32,14 @@ void Animation::load_animations(char elemento)
 	}
 	else if(elemento == 'D')
 	{
-		BEnemy[0].LoadPNGImage("Sprites\\Inimigos\\InimigoGrande.png");
-		BEnemy[1].LoadPNGImage("Sprites\\Inimigos\\InimigoGrande2.png");
+		for(i=0; i<21;i++)
+		{
+			sprintf(number, "%d", i);
+			strcpy(paths[i],"Sprites\\Wut\\");
+			strcat(paths[i],number);
+			strcat(paths[i],extensao);
+			BEnemy[i].LoadPNGImage(paths[i]);
+		}
 	}
 	else if(elemento == 'd')
 	{
@@ -66,6 +73,14 @@ void Animation::load_animations(char elemento)
 			strcat(paths[i],number);
 			strcat(paths[i],extensao);
 			Coin[i].LoadPNGImage(paths[i]);
+		}
+		for(i=0; i<4;i++)
+		{
+			sprintf(number, "%d", i);
+			strcpy(paths[i],"Sprites\\Ouro\\hud");
+			strcat(paths[i],number);
+			strcat(paths[i],extensao);
+			CoinHUD[i].LoadPNGImage(paths[i]);
 		}
 	}
 	else if(elemento == 'A')
@@ -107,6 +122,8 @@ void Animation::load_animations(char elemento)
 			strcat(paths[i],extensao);
 			SmokeScreen[i].LoadPNGImage(paths[i]);
 		}
+		EndGame.LoadPNGImage("Sprites\\Preload\\EndGame.png");
+		Dead.LoadPNGImage("Sprites\\Preload\\Dead.png");
 	}
 
 }
@@ -235,6 +252,7 @@ Image Animation::PassaElementos(char elemento, int time)
 	int nframes;
 	int delay = 3;
 	int acclrt = 2;
+	int tiempo;
 	if(elemento == 'U')
 	{
 		nframes = 11;
@@ -243,7 +261,10 @@ Image Animation::PassaElementos(char elemento, int time)
 	}
 	else if(elemento == 'D')
 	{
-		frame = in_range_delayed(time,80,acclrt);
+		tiempo = time%(4*delay*15);
+		nframes = 20;
+		frame = ((time/delay)%(nframes));
+		if(tiempo >= (20*delay)) frame = 20;
 		return BEnemy[frame];
 	}
 	else if(elemento == 'd')
@@ -292,6 +313,10 @@ Image Animation::PassaOutros(char elemento, int _time)
 		frame = _time%nframes;
 		return SmokeScreen[frame];
 	}
+	else if(elemento == 'O')
+	{
+		return CoinHUD[_time];
+	}
 	exit(0);
 }
 
@@ -314,4 +339,18 @@ void Animation::curtaincalls(Graphics& graph, int _time, int scX, int scY , bool
 	}
 	graph.DrawImage2D(0,0,scX,scY,PassaOutros('L',frame));
 	Sleep(wait);
+}
+
+void Animation::AnimEndGame(Graphics& graph, int _time, int boo)
+{
+	int spdUp = 2;
+	int t = spdUp * _time;
+	int h = 420;
+	int w = 280;
+	int maxH = ((7*DFLTSIZE + MyZeroY) - h/2);
+	int distY = t - h;
+	int distX = (7*DFLTSIZE + MyZeroX) - w/2;
+	if(distY > maxH) distY = maxH;
+	if(boo == 0)graph.DrawImage2D(distX, distY, w, h, EndGame);
+	else if(boo == 1) graph.DrawImage2D(distX, distY, w, h, Dead);
 }

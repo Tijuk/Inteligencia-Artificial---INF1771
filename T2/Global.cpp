@@ -2,8 +2,8 @@
 
 int SW = 1400;
 int SH = 1000;
-int posInicialX = 1;
-int posInicialY = 1;
+int posInicialX = 0;
+int posInicialY = 0;
 int MyZeroX = 10;
 int MyZeroY = 100 - (MyZeroX - 2);
 int mapEdgeX = ((LN+1)*DFLTSIZE) + MyZeroX;
@@ -29,9 +29,9 @@ void le_mapa(void)
 			fscanf(arq," %c", &mapa_global[LN-(i+1)][j]);
 			//mapa_global[i][j] = '.';
 			//if(i==j) mapa_global[i][j] = 'T';
-			if((LN-(j+1))==1 && i==1)
+			if((LN-(j+1))==0 && i==0)
 			{
-				mapa_global[LN-(i+1)][j] = 'E';
+				mapa_global[i][LN-(i+1)] = 'E';
 			}
 			//mapa_global[i][j] = '.';
 			mapa_global_backup[LN-(i+1)][j]=mapa_global[LN-(i+1)][j];
