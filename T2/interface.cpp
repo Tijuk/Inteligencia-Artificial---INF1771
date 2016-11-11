@@ -10,14 +10,13 @@
 #include "Agente.hpp"
 #include "PreLoad.hpp"
 
-int AI = 1;
+int AI = 0;
 
 static Graphics graphics;
 static InterGraf graf;
 static FOW_cls fogow;
 static AgenteCls agnt;
 static EndGameCls endgame;
-static TextCls text;
 static Animation anim;
 static char mapa[LN][COL];
 static PLCls preload;
@@ -64,6 +63,7 @@ void MainLoop()
 		}
 		else
 		{
+			POS_LOAD_STATE = 1;
 			int tick = GetTickCount();
 			time_float += getTime();
 			timer = getSecond(time_float);
@@ -131,7 +131,6 @@ void InterGraf::carregaImagens(void)
 	//RightWall, LeftWall, TopWall, DownWall, TLCorner, TRCorner, DLCorner, DRCorner;
 	fogow.load();
 	agnt.load();
-	text.load_message();
 	anim.load_em_all();
 	preload.load();
 	MapFloor.LoadPNGImage("Sprites\\Floor\\Floor.png");
@@ -795,7 +794,7 @@ void EndGame::writeScore(int elem)
 	int val;
 	char valor[10];
 	int x = (7*DFLTSIZE + MyZeroX) - 20;
-	int y = 542;
+	int y = 592;
 	int dx, dy;
 	dy = 33 + 11;
 	dx = 0;

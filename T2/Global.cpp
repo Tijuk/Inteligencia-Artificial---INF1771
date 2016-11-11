@@ -29,14 +29,11 @@ void le_mapa(void)
 			fscanf(arq," %c", &mapa_global[LN-(i+1)][j]);
 			//mapa_global[i][j] = '.';
 			//if(i==j) mapa_global[i][j] = 'T';
-			if((LN-(j+1))==0 && i==0)
-			{
-				mapa_global[i][LN-(i+1)] = 'E';
-			}
 			//mapa_global[i][j] = '.';
 			mapa_global_backup[LN-(i+1)][j]=mapa_global[LN-(i+1)][j];
 		}
 	}
+	mapa_global[LN-(j+1)][i] = 'E';
 	fclose(arq);
 }
 void passa_mapa(char matriz[LN][COL])
