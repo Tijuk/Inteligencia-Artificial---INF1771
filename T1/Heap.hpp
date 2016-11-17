@@ -9,7 +9,7 @@ private:
 	NoHeap* _raiz;
 	int _numElem;
 	Lista _insercao;
-	bool (*_comparacao)(void* a, void* b); // Retorno 1 -> a é prioridade, Retorno 0 -> b é prioridade (No caso a == b, retornar 0 otimiza o heap)
+	bool (*_comparacao)(void* a, void* b); // Retorno 1 -> a Ã© prioridade, Retorno 0 -> b Ã© prioridade (No caso a == b, retornar 0 otimiza o heap)
 
 	void apagaSubArvore(NoHeap* subRaiz);
 	void mostraNoHeap(NoHeap* no, void (imprime)(void*));
@@ -18,7 +18,7 @@ private:
 	void updatePopElem();
 	void corrigeAcima(NoHeap* no);
 	void corrigeAbaixo(NoHeap* no);
-	NoHeap* insereSemCorrigir(void* info); // Retorna nó inserido
+	NoHeap* insereSemCorrigir(void* info); // Retorna nÃ³ inserido
 
 public:
 
