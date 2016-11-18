@@ -5,12 +5,15 @@
 #include "Animate.hpp"
 #include <Windows.h>
 #include "Global.hpp"
-#include "Message.hpp"
 #include "FogOfWar.hpp"
 #include "Agente.hpp"
 #include "PreLoad.hpp"
+#include <SWI-cpp.h>
+#include <string.h>
 
-int AI = 0;
+#define TEMPO_DECISAO 10
+
+int AI = 1;
 
 static Graphics graphics;
 static InterGraf graf;
@@ -41,17 +44,18 @@ float getTime(void);
 void teclado(int key, int state, int x, int y);
 int treco = 0;
 int gS = 1; //gS = gridSize
-float time_float = 0;
 int timer = 0;
 int PRE_LOAD_STATE = 1;
 int POS_LOAD_STATE = 0;
+int contaLoop = 0;
 
 void MainLoop()
 {
+	float elapsedTime = graphics.GetElapsedTime();
 	if(PRE_LOAD_STATE == 1)
 	{
-		//preload.loop_pre_load(graphics,anim);
-		PRE_LOAD_STATE = 0;
+		preload.loop_pre_load(graphics,anim);
+		//PRE_LOAD_STATE = 0;
 	}
 	else
 	{
@@ -63,14 +67,11 @@ void MainLoop()
 		}
 		else
 		{
-			POS_LOAD_STATE = 1;
-			int tick = GetTickCount();
-			time_float += getTime();
-			timer = getSecond(time_float);
+
 			graf.iniciaMapa();
 			CasaAtual = agnt.checa_casa_atual();
 			fogow.atualiza_fow(agnt);
-			//fogow.imprime_fow(graphics);
+			fogow.imprime_fow(graphics);
 			if(agnt.get_AGENT_STATE() == 0)
 			{
 				agnt.drawstatic(graphics,anim);
@@ -86,14 +87,20 @@ void MainLoop()
 				endgame.checaJogo();
 				if(AI == 1)
 				{
-					info.le_prolog();
+
+					if (contaLoop < TEMPO_DECISAO) {
+						contaLoop++;
+					} else {
+						if (info.le_prolog())
+						contaLoop = 0;
+					}
 				}
 			}
 			else
 			{
 				end.EndHUD(NLoop);
 			}
-			//graf.auxilia();
+			graf.auxilia();
 			passa_mapa(mapa);
 			HUD.insereHUD();
 			NLoop++;
@@ -588,13 +595,15 @@ TalkProlog::TalkProlog()
 int TalkProlog::get_direction(int x, int y)
 {
 	int value = 0;
+	//printf("x antes: %d - x depois: %d\n", _y, y);
+	//printf("y antes: %d - y depois: %d\n", _x, x);
+
 	if((_x != x && _y == y) || (_x == x && _y != y))
 	{
 		if( _x == x)
 		{
-			printf("y: %d - _y: %d\n", y, _y);
-			printf("value: %d\n\n", value);
-			if(_y > y)
+			//printf("y: %d - _y: %d\n", y, _y);
+			if(_y < y)
 			{
 				value = 1;
 			}
@@ -605,10 +614,8 @@ int TalkProlog::get_direction(int x, int y)
 		}
 		else
 		{
-			printf("x: %d - _x: %d\n", x, _x);
-			value =  _x - x;
-			printf("value: %d\n\n", value);
-			if(_x < x)
+			//printf("x: %d - _x: %d\n", x, _x);
+			if(_x > x)
 			{
 				value = 2;
 			}
@@ -618,18 +625,21 @@ int TalkProlog::get_direction(int x, int y)
 			}
 		}
 	}
+	//printf("value: %d\n\n", value);
 	return value;
 }
-void TalkProlog::le_prolog(void)
+bool TalkProlog::le_prolog(void)
 {
 	int x,y;
 	int direc;
 	int teleportado = 0;
+	int direcProlog;
 	x = 0, y = 0;
 	if(agnt.get_AGENT_STATE() == 0)
 	{
-		//talk_prolog(&_health, &_bullets, &x, &y);
-		direc = (rand()%4)+1;//get_direction(x,y);
+		talk_prolog(&_health, &_bullets, &x, &y, &direcProlog);
+		//direc = (rand()%4)+1;//get_direction(x,y);
+		direc = get_direction(x,y);
 		agnt.checa_casa_atual();
 		if(direc != 0)
 		{
@@ -649,15 +659,54 @@ void TalkProlog::le_prolog(void)
 			}
 			agnt.checa_casa_atual();
 			Sleep(50);
-		}
+		} else 
+			agnt._direc = direcProlog;
+		return true;
 	}
+	return false;
 }
-void TalkProlog::talk_prolog(int* h, int* b, int* x, int* y)
+void TalkProlog::talk_prolog(int* h, int* b, int* x, int* y, int* direc)
 {
 	int health, bullets, cx,cy;
 	health = 100;
 	bullets = 5;
-	if(_pace == 0)
+
+	{
+		PlTermv NoArg(0);
+		PlQuery agir("agir",NoArg);
+		agir.next_solution();
+	}
+
+	{
+		PlTermv playerPosArg(2);
+		PlQuery playerPos("playerPos",playerPosArg);
+		playerPos.next_solution();
+		*x = (int) playerPosArg[0];
+		*y = (int) playerPosArg[1];
+		//printf("y: %d\n", *x);
+		//printf("x: %d\n", *y);
+	}
+
+	{
+		char* direcao;
+		PlTermv playerDirecArg(1);
+		PlQuery playerDirec("playerDirec",playerDirecArg);
+		playerDirec.next_solution();
+		direcao = (char*) playerDirecArg[0];
+		if (strcmp(direcao,"cima") == 0)
+			*direc = 1;
+		else
+		if (strcmp(direcao,"esquerda") == 0)
+			*direc = 2;
+		else
+		if (strcmp(direcao,"baixo") == 0)
+			*direc = 3;
+		else
+		if (strcmp(direcao,"direita") == 0)
+			*direc = 4;
+	}
+
+	/*if(_pace == 0)
 	{
 		cx = 2;
 		cy = 1;
@@ -696,9 +745,9 @@ void TalkProlog::talk_prolog(int* h, int* b, int* x, int* y)
 	{
 		cx = 1;
 		cy = 1;
-	}
-	*x = cx;
-	*y = cy;
+	}*/
+	/**x = cx;
+	*y = cy;*/
 	_pace++;
 }
 
