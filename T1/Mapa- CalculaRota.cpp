@@ -23,8 +23,8 @@ bool compara(void* a, void* b) {
 
 void Mapa::calculaRota(Lista &abertos, Lista &caminho) {
 
-	Heap aAbrir(compara); // de nós heurísticos
-	Lista temp; // para abrir nós
+	Heap aAbrir(compara); // de nÃ³s heurÃ­sticos
+	Lista temp; // para abrir nÃ³s
 	NoMapa* noAtual = _inicial;
 
 	noAtual->abreVizinhos(temp);
