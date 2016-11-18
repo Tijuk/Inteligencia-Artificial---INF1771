@@ -15,7 +15,7 @@ private:
 	NoHeap* _pai;
 	NoHeap* _esq;
 	NoHeap* _dir;
-	Direc _lado; // = NULO caso n„o possua pai
+	Direc _lado; // = NULO caso n√£o possua pai
 	void* _info;
 
 public:
