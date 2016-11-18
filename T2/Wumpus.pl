@@ -62,6 +62,7 @@ vidaWumpus1(100).
 vidaWumpus2(100).
 danoWumpus1(20).
 danoWumpus2(50).
+% danoArma assumido como o pior caso em vez de randômico, pois IA sempre escolhe atirar 5 vezes, então não há diferença
 danoArma(20).
 
 % mapa: mapeia cada evento presente em X,Y do mapa, caso Evento seja variável.
@@ -82,6 +83,7 @@ limitesMapa(1,12,1,12).
 mapaEntrada(1,1).
 
 % sala: mapeia cada evento presente em Linha,Coluna da matriz do mapa, lida pelo executável. As linhas estão em contagem invertida.
+% (Asserts são feitos pelo C++)
 
 % virandoDir: mapeia direções antes/após virar à direita.
 virandoDir(direita,baixo).
@@ -977,4 +979,5 @@ tentaBotarFila(No,FilaAntes,FilaDepois,VisitadosAntes,VisitadosDepois) :-
 	
 tentaBotarFila(_,Fila,Fila,Visitados,Visitados) :- !.
 
+% Será chamado pelo C++:
 % :- iniciar.
