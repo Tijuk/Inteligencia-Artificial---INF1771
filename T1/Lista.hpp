@@ -27,7 +27,7 @@ public:
 
 	void*& operator[](int pos);
 
-	int busca(void* elemBuscado, bool (*criterio)(void* elemBuscado, void* elemLista) = NULL); // Retorna o indice do elemento procurado ou -1 se inexistente. "criterio" È a funÁ„o que retorna 1 caso seu par‚metro corresponda ao que se procura (O tipo de elemBuscado pode ser diferente do tipo padr„o da lista)
+	int busca(void* elemBuscado, bool (*criterio)(void* elemBuscado, void* elemLista) = NULL); // Retorna o indice do elemento procurado ou -1 se inexistente. "criterio" √© a fun√ß√£o que retorna 1 caso seu par√¢metro corresponda ao que se procura (O tipo de elemBuscado pode ser diferente do tipo padr√£o da lista)
 
 	int getSize();
 };
