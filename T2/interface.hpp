@@ -46,8 +46,8 @@ private:
 public:
 	TalkProlog();
 	int get_direction(int x, int y);
-	void le_prolog(void);
-	void talk_prolog(int *h, int *b, int *x, int *y);
+	bool le_prolog(void);
+	void talk_prolog(int *h, int *b, int *x, int *y, int* direc);
 };
 
 class ClsHUD
