@@ -12,7 +12,6 @@ private:
 	int AGENT_STATE;
 	int _spdX;
 	int _spdY;
-	int _direc;
 	int _dist;
 	int _walked;
 	int _frame;
@@ -33,6 +32,7 @@ public:
 	int _passos;
 	int _posX;
 	int _posY;
+	int _direc;
 	float _scale;
 	int _spritesize;
 	int _state;
