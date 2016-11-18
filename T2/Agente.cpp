@@ -1,6 +1,5 @@
 #include <string.h>
 #include "Agente.hpp"
-#include "Message.hpp"
 #include <stdlib.h>
 
 static Image Agent;
